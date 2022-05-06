@@ -4,16 +4,18 @@ pragma solidity ^0.8.0;
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@unioncredit/v1-sdk/contracts/BaseUnionMember.sol";
+import "@unioncredit/v1-sdk/contracts/interfaces/IUserManager.sol";
 
 /*
 
 */
 
-contract SupDao is ERC721, BaseUnionMember {
+contract SupDao is ERC721 {
 
   uint256 public id;
   uint256 public newMemberFee = 20;
   address[] public initialMembers;
+  IUserManager public userManager;
 
   // mapping of existing member to new member to endorsed
   mapping(address => mapping(address => bool)) public endorsements;
@@ -21,10 +23,12 @@ contract SupDao is ERC721, BaseUnionMember {
   // mapping of endorsed addresses
   mapping(address => bool) public endorsed;
 
-  /*
-  Seed the DAO with 3 members
-  */
-  constructor (address member1, address member2, address member3) {
+  // Seed the DAO with 3 members
+  constructor (
+    address member1, 
+    address member2, 
+    address member3
+    ) ERC721("UnionNFT", "UNFT") {
 
     //TODO: question - do the 3 initial members need to pay the membership fees?
     
@@ -46,7 +50,7 @@ contract SupDao is ERC721, BaseUnionMember {
       // mint their NFT - which is their membership
       _mint(initialMembers[i], id++);
 
-      // TODO: who is msg.sender in the constructor?
+      // TODO: who is msg.sender in the constructor? is it the supdao contract address?
       // addresses endorse each other
       endorse(initialMembers[i]);
 
@@ -82,7 +86,7 @@ contract SupDao is ERC721, BaseUnionMember {
     userManager.registerMember(newMember);
 
     // pay membership fee
-    unionToken.transferFrom(newMember, address(this), newMemberFee);
+    transferFrom(newMember, address(this), newMemberFee);
 
     // stake all the DAI
     stake();
