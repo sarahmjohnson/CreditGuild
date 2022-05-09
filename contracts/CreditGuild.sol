@@ -1,21 +1,22 @@
 //SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@unioncredit/v1-sdk/contracts/BaseUnionMember.sol";
-import "@unioncredit/v1-sdk/contracts/interfaces/IUserManager.sol";
 
 /*
-
+credit guild
 */
 
-contract CreditGuild is ERC721 {
+contract CreditGuild is ERC721 { // replace with the nouns one. copy it over and change stuff.
 
   uint256 public id;
   uint256 public newMemberFee = 20;
   address[] public initialMembers;
   IUserManager public userManager;
+  // vouch amount. also make a set get function for it
+  // ask gerald about making nft non transferrable
 
   // mapping of existing member to new member to endorsed
   mapping(address => mapping(address => bool)) public endorsements;
@@ -26,7 +27,7 @@ contract CreditGuild is ERC721 {
   // Seed the DAO with 3 members
   constructor (
     address member1, 
-    address member2, 
+    address member2, // put the membership fees in the constructor
     address member3
     ) ERC721("UnionNFT", "UNFT") {
 
@@ -56,7 +57,7 @@ contract CreditGuild is ERC721 {
 
     }
   }
-
+  // dont need this function
   function endorse(address newMember) public {
 
     require(userManager.checkIsMember(msg.sender), "Sender is not a union member.");
@@ -69,13 +70,20 @@ contract CreditGuild is ERC721 {
 
     // the DAO vouches for this newMember - vouchAmount will be updated after the vote
     userManager.updateTrust(newMember, 0);
+
+    // do the vouching, then the register function can take the 3 addresses. check they are all vouching and then mint the NFT
     
   }
 
   function register(address newMember) public {
 
+    // pass in the 3 addresses who are vouching, check they are vouching for the sender on union, check that they are members of the supdao, then process the membership which adds them to the guild
+
+    //require balanceof(msg.sender) > 0
+    //make sure you cant sell the membersihp to someone else
+
     // check if msg.sender is endorsed
-    require(endorsed[msg.sender], "Sender is not endorsed.");
+    require(endorsed[msg.sender], "Sender is not endorsed."); //check if it has 3 endorsements
 
     // check if newMember is endorsed
     require(endorsements[msg.sender][newMember]);
@@ -101,6 +109,8 @@ contract CreditGuild is ERC721 {
 
     // can only be updated after a vote by the DAO
     userManager.updateTrust(member, vouchAmount);
+
+    // get votes function in nouns dao
 
   }
 
