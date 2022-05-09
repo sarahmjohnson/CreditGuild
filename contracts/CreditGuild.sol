@@ -10,7 +10,7 @@ import "@unioncredit/v1-sdk/contracts/interfaces/IUserManager.sol";
 
 */
 
-contract SupDao is ERC721 {
+contract CreditGuild is ERC721 {
 
   uint256 public id;
   uint256 public newMemberFee = 20;
