@@ -1,6 +1,5 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const {userManager} = require("@unioncredit/v1-sdk");
 
 describe("CreditGuild", function () {
     
@@ -14,22 +13,22 @@ describe("CreditGuild", function () {
     before(async function () {
         [ADMIN, ALICE, BOB, TOM, MEMBER1, MEMBER2, MEMBER3, MEMBER4, APP, PROXY_ADMIN] = await ethers.getSigners();
 
-        userManager.registerMember(ALICE);
-        userManager.registerMember(BOB);
-        userManager.registerMember(TOM);
+        // userManager.registerMember(ALICE);
+        // userManager.registerMember(BOB);
+        // userManager.registerMember(TOM);
 
-        // items = await ethers.getSigners();
-        // const CreditGuild = await ethers.getContractFactory("SupDao");
-        // creditGuild = await CreditGuild.deploy(
-        //     address1,
-        //     address2,
-        //     address3
-        // );
-        // await creditGuild.deployed();
+        items = await ethers.getSigners();
+        const CreditGuild = await ethers.getContractFactory("CreditGuildMock");
+        creditGuild = await CreditGuild.deploy(
+            ALICE,
+            BOB,
+            TOM
+        );
+        await creditGuild.deployed();
 
-        // [address0] = await ethers.getSigners();
+        [address0] = await ethers.getSigners();
 
-        // sup_DaoAddress = creditGuild.address;c
+        sup_DaoAddress = creditGuild.address;c
     });
 
     beforeEach(async function () {
