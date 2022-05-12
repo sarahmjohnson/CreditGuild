@@ -3,7 +3,7 @@ const { ethers } = require("hardhat");
 
 describe("CreditGuild", function () {
     
-    // let userManager;
+    let membershipFee = 20;
     let creditGuild;
     let address0;
     let address1;
@@ -18,46 +18,23 @@ describe("CreditGuild", function () {
         // userManager.registerMember(TOM);
 
         items = await ethers.getSigners();
-        const CreditGuild = await ethers.getContractFactory("CreditGuildMock");
-        creditGuild = await CreditGuild.deploy(
-            ALICE,
-            BOB,
-            TOM
-        );
+        const CreditGuild = await ethers.getContractFactory("UserManagerMock");
+        creditGuild = await CreditGuild.deploy(membershipFee);
         await creditGuild.deployed();
 
         [address0] = await ethers.getSigners();
 
-        sup_DaoAddress = creditGuild.address;c
+        sup_DaoAddress = creditGuild.address;
     });
 
     beforeEach(async function () {
 
-
-
-        // Create member and ad
-
     });
 
-    describe("Endorse", function () {
+    describe("Initialize", function () {
 
-        it("Existing DAO member should endorse a new member", async function () {
-
-            // const tx = await hardhatSup_Dao.endorse(
-            //     ROYALTY
-            // )
-            // const resp = await tx.wait();
-    
-            // tokenId = resp.events[resp.events.length - 1].args.tokenId;
-
-            // expect(await tokenId).to.equal(1);
-
-            // royaltyAddress, royaltyArray = await hardhatNFT.royaltyInfo(tokenId, SALEPRICE);
-            // expect(this.address).to.equal(royaltyAddress);
-            
-            // royaltyToMatch = royaltyArray[1]/SALEPRICE;
-            // expect(ROYALTY).to.equal(royaltyToMatch*100);
-
+        it("Should initialize first 3 members", async function () {
+            creditGuild.initialize(ALICE, BOB, TOM);
         });
     });
 

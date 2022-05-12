@@ -2,24 +2,25 @@
 pragma solidity ^0.8.4;
 
 import "hardhat/console.sol";
-// import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@unioncredit/v1-sdk/contracts/BaseUnionMember.sol";
-import "./base/ERC721.sol";
+// import "./base/ERC721.sol";
 
 /*
 credit guild
 */
 
-contract CreditGuild is ERC721, BaseUnionMember { 
+// contract CreditGuild is ERC721, BaseUnionMember { 
+contract CreditGuild is ERC721 { 
 
     bool isInitialized = false;
     uint256 public id;
     uint256 public membershipFee;
     address[] public initialMembers;
     ERC20 public erc20;
+    IUserManager public userManager;
     // TODO: ask gerald about making nft non transferrable
-
 
     mapping(address => bool) public members;
     address[] public membersArray;
@@ -29,17 +30,20 @@ contract CreditGuild is ERC721, BaseUnionMember {
         _;
     }
 
-    constructor (uint256 newMemberFee) {
+    constructor (uint256 newMemberFee) ERC721("UnionNFT", "UNFT") {
         // set membership fee
         membershipFee = newMemberFee;
+    }
+
+    function checkIsMember(address potentialMember) public virtual returns(bool) {
+        return(userManager.checkIsMember(potentialMember));
     }
 
     // Seed the DAO with 3 members
     function initialize(
         address member1, 
         address member2, 
-        address member3,
-        uint256 newMemberFee
+        address member3
     ) public onlyAdmin(msg.sender) {
         require(!isInitialized, 'Contract is already initialized!');
         isInitialized = true;
@@ -54,7 +58,7 @@ contract CreditGuild is ERC721, BaseUnionMember {
         for (uint256 i = 0; i < 3; i++) {
         
             // check they are union members
-            userManager.checkIsMember(initialMembers[i]);
+            require(checkIsMember(initialMembers[i]));
 
             // pay membership fee
             erc20.transferFrom(initialMembers[i], address(this), membershipFee);
