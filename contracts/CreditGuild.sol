@@ -11,14 +11,13 @@ import "./base/ERC721.sol";
 credit guild
 */
 
-contract CreditGuild is ERC721 { 
+contract CreditGuild is ERC721, BaseUnionMember { 
 
     bool isInitialized = false;
     uint256 public id;
     uint256 public membershipFee;
     address[] public initialMembers;
     ERC20 public erc20;
-    IUserManager public userManager;
     // TODO: ask gerald about making nft non transferrable
 
 
