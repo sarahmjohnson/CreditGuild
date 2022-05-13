@@ -8,9 +8,9 @@ import "../CreditGuild.sol";
 /*
 credit guild
 */
-contract UserManagerMock is CreditGuild { 
+// contract UserManagerMock is CreditGuild { 
 
-    function checkIsMember(address potentialMember) public override returns(bool) {
-        return(true);
-    }
-}
+//     function checkIsMember(address potentialMember) public override returns(bool) {
+//         return(true);
+//     }
+// }
