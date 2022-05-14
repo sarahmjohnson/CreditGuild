@@ -2,6 +2,7 @@
 pragma solidity ^0.8.4;
 
 import "hardhat/console.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -13,11 +14,9 @@ credit guild
 
 // contract CreditGuild is ERC721, BaseUnionMember { 
 // TODO: ask gerald about making nft non transferrable
-contract CreditGuild is ERC721, BaseUnionMember, Ownable { 
+contract CreditGuild is ERC721Enumerable, BaseUnionMember, Ownable { 
 
     bool public isInitialized;
-
-    // IERC20 public underlyingToken;
 
     uint256 public constant MIN_MEMBERSHIP_FEE = 1 ether;
 
@@ -27,9 +26,6 @@ contract CreditGuild is ERC721, BaseUnionMember, Ownable {
     
     uint256 public vouchAmount;
 
-    mapping(address => uint256) public addressToId;
-
-
     event Initialize(address[] initialMembers);
     event SetVouchAmount(uint256 vouchAmount);
     event Register(address sender, address[] members, uint256 vouchAmount);
@@ -37,7 +33,8 @@ contract CreditGuild is ERC721, BaseUnionMember, Ownable {
     event ClaimVouch(address sender, uint256 vouchAmount);
     event MintNFT(address member, uint256 currentId);
     event BurnMembership(address member, uint256 memberId);
-
+    event CheckIsMember(bool result);
+    event Stake(uint256 daoBalance);
 
     constructor(
       uint256 _membershipFee,
@@ -46,15 +43,13 @@ contract CreditGuild is ERC721, BaseUnionMember, Ownable {
       address _unionToken,
       address _underlyingToken
     ) ERC721("UnionNFT", "UNFT") BaseUnionMember(_marketRegistry, _unionToken, _underlyingToken) {
-        console.log('hi');
         
         // set membership fee
         require(_membershipFee >= MIN_MEMBERSHIP_FEE, "membershipFee too low");
         membershipFee = _membershipFee;
         vouchAmount = _vouchAmout;
-        // TODO: i don't think we need to declare this because its a state variable
-        // underlyingToken = IERC20(_underlyingToken);
         isInitialized = false;
+        
     }
 
     // Seed the DAO with 3 members
@@ -63,7 +58,7 @@ contract CreditGuild is ERC721, BaseUnionMember, Ownable {
         address member2, 
         address member3
     ) public onlyOwner {
-        require(!isInitialized, 'initialized');
+        require(!isInitialized, "initialized");
         isInitialized = true;
 
         // make sure all addresses are unique
@@ -75,6 +70,9 @@ contract CreditGuild is ERC721, BaseUnionMember, Ownable {
         initialMembers[0] = member1;
         initialMembers[1] = member2;
         initialMembers[2] = member3;
+
+        console.log("this address: ", address(this));
+        console.log("this user manager: ", address(userManager));
 
         require(userManager.checkIsMember(address(this)), "DAO !member");
 
@@ -112,14 +110,15 @@ contract CreditGuild is ERC721, BaseUnionMember, Ownable {
 
     // TODO: this wont work right now because of the beforeTokenTransfer override
     function burnMembership(address member) public virtual onlyOwner {
-        uint256 memberId = addressToId[member];
-        _burn(memberId);
-        emit BurnMembership(member, memberId);
-
+        uint256 membershipId = tokenOfOwnerByIndex(member, 0); 
+        require(ownerOf(membershipId) == member, "!member");
+         _burn(membershipId); emit BurnMembership(member, membershipId); 
     }
 
     function checkIsMember(address potentialMember) public virtual returns(bool) {
-      return balanceOf(potentialMember) > 0;
+        bool result = balanceOf(potentialMember) > 0;
+        emit CheckIsMember(result);
+        return(result);
     }
 
     function register(address[] memory members) public virtual {
@@ -150,28 +149,21 @@ contract CreditGuild is ERC721, BaseUnionMember, Ownable {
 
     function stake() public virtual {
         // get total DAI
-        uint256 DAOBalance = balanceOf(address(this));
+        uint256 daoBalance = balanceOf(address(this));
         // stake all the DAI
-        userManager.stake(DAOBalance);
+        userManager.stake(daoBalance);
+        emit Stake(daoBalance);
     }
 
     function mintNFT(address member) internal {
         // mint their NFT - which is their membership
         uint256 currentId = ++id;
         _safeMint(member, currentId);
-        addressToId[member] = currentId;
         emit MintNFT(member, currentId);
     }
 
     // calls before every ERC721 call
-    function _beforeTokenTransfer(
-        address from,
-        address,
-        uint256  
-    ) internal override pure {
-      if(from != address(0)) {
-        // cannot transfer
-        require(false, "!transfer");
-      }
+    function _beforeTokenTransfer(address from, address to, uint256) internal override pure {
+        require(from == address(0) || to == address(0), "!transfer"); 
     }
 }
