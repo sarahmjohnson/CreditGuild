@@ -58,6 +58,7 @@ contract CreditGuild is ERC721Enumerable, BaseUnionMember, Ownable {
         address member2, 
         address member3
     ) public onlyOwner {
+        
         require(!isInitialized, "initialized");
         isInitialized = true;
 
@@ -99,29 +100,38 @@ contract CreditGuild is ERC721Enumerable, BaseUnionMember, Ownable {
     }
 
     function setVouchAmount(uint256 _vouchAmount) public virtual onlyOwner {
+
         vouchAmount = _vouchAmount;
         emit SetVouchAmount(vouchAmount);
+
     }
 
     function setMembershipFee(uint256 _membershipFee) public virtual onlyOwner {
+
         membershipFee = _membershipFee;
         emit SetMembershipFee(membershipFee);
+
     }
 
     // TODO: this wont work right now because of the beforeTokenTransfer override
     function burnMembership(address member) public virtual onlyOwner {
+
         uint256 membershipId = tokenOfOwnerByIndex(member, 0); 
         require(ownerOf(membershipId) == member, "!member");
-         _burn(membershipId); emit BurnMembership(member, membershipId); 
+        _burn(membershipId); emit BurnMembership(member, membershipId); 
+        
     }
 
     function checkIsMember(address potentialMember) public virtual returns(bool) {
+
         bool result = balanceOf(potentialMember) > 0;
         emit CheckIsMember(result);
         return(result);
+
     }
 
     function register(address[] memory members) public virtual {
+
         require(members.length == 3, "!3 members");
         require(!checkIsMember(msg.sender), "member");
 
@@ -143,27 +153,35 @@ contract CreditGuild is ERC721Enumerable, BaseUnionMember, Ownable {
     function claimVouch() public {
 
         userManager.updateTrust(msg.sender, vouchAmount);
-
         emit ClaimVouch(msg.sender, vouchAmount);
+
     }
 
     function stake() public virtual {
+
         // get total DAI
         uint256 daoBalance = balanceOf(address(this));
+
         // stake all the DAI
         userManager.stake(daoBalance);
+
         emit Stake(daoBalance);
     }
 
     function mintNFT(address member) internal {
+
         // mint their NFT - which is their membership
         uint256 currentId = ++id;
         _safeMint(member, currentId);
+
         emit MintNFT(member, currentId);
+
     }
 
     // calls before every ERC721 call
     function _beforeTokenTransfer(address from, address to, uint256) internal override pure {
+        
         require(from == address(0) || to == address(0), "!transfer"); 
+
     }
 }

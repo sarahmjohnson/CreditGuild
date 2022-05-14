@@ -1,9 +1,6 @@
-const {ethers, upgrades, waffle} = require("hardhat");
+const {ethers} = require("hardhat");
 const {expect} = require("chai");
 require("chai").should();
-const {parseEther} = require("ethers").utils;
-
-const AddressZero = ethers.constants.AddressZero;
 
 describe("CreditGuild", function () {
     
@@ -18,12 +15,12 @@ describe("CreditGuild", function () {
         const marketRegistry = await MarketRegistry.deploy(); 
         const MockERC20 = await ethers.getContractFactory("FaucetERC20"); 
 
-        // initialize underlyingToken
+        // deploy underlyingToken
         const underlyingToken = await MockERC20.deploy(); 
         underlyingToken.mint(ADMIN, 100 * 10 ** 18); // min 100 DAI (underlying) 
         const underlyingAddress = underlyingToken.address; 
 
-        // initialize uToken
+        // deploy uToken
         const uToken = await MockERC20.deploy(); 
         uToken.mint(ADMIN, 100 * 10 ** 18); 
         const uTokenAddress = uToken.address; 
@@ -31,12 +28,12 @@ describe("CreditGuild", function () {
         console.log("marketRegistry address: ", marketRegistry.address)
         console.log("userManager address: ", USERMANAGER.address)
 
-        // this adds the mockUtoken contract for the mock underlying token (DAI) 
+        // add mockUtoken contract for the mock underlying token (DAI) 
         await marketRegistry.addUToken(underlyingAddress, uTokenAddress);
         await marketRegistry.addUserManager(underlyingAddress, USERMANAGER.address);
 
+        // deploy creditGuild
         const CreditGuild = await ethers.getContractFactory("CreditGuild");
-
         creditGuild = await CreditGuild.deploy(
             MEMBERSHIPFEE,
             VOUCHAMOUNT,
@@ -45,14 +42,15 @@ describe("CreditGuild", function () {
             underlyingAddress
         );
 
-
     });
 
     describe("Initialize", function () {
 
         it("Should initialize first 3 members", async function () {
-            console.log("member1: ",MEMBER1.address)
+
+            console.log("member1: ", MEMBER1.address)
             await creditGuild.initialize(MEMBER1.address, MEMBER2.address, MEMBER3.address);
+            
         });
     });
 
@@ -60,13 +58,18 @@ describe("CreditGuild", function () {
 
         it("Should set membership fee", async function () {
 
+            // membershipFee should be set to the amount provided in the constructor
             const initialMembershipFee = await creditGuild.membershipFee();
             expect(MEMBERSHIPFEE).to.equal(initialMembershipFee);
 
+            // happy path - test changing the fee with the setMembershipFee function
             const newMembershipFee = ethers.utils.parseEther("200")
             await creditGuild.setMembershipFee(newMembershipFee);
             const membershipFee = await creditGuild.membershipFee();
             expect(membershipFee).to.equal(newMembershipFee);
+
+            // unhappy path - test revert when onlyOwner fails
+
         });
     });
 
@@ -74,13 +77,18 @@ describe("CreditGuild", function () {
 
         it("Should set vouch amount", async function () {
 
+            // vouchAmount should be set to the amount provided in the constructor
             const initialVouchAmount = await creditGuild.vouchAmount();
             expect(VOUCHAMOUNT).to.equal(initialVouchAmount);
 
+            // happy path - test changing the vouch amount with the setVouchAmount function
             const newVouchAmount = ethers.utils.parseEther("50");
             await creditGuild.setVouchAmount(newVouchAmount);
             const vouchAmount = await creditGuild.vouchAmount();
             expect(vouchAmount).to.equal(newVouchAmount);
+
+            // unhappy path - test revert when onlyOwner fails
+
         });
     });
 
@@ -89,8 +97,7 @@ describe("CreditGuild", function () {
         it("Should check if address is a member", async function () {
             // await creditGuild.initialize(ALICE.address, BOB.address, TOM.address);
 
-
-            // happy path
+            // Alice should be a member
             // const potentialMember = ALICE.address;
             // const tx = await creditGuild.checkIsMember(potentialMember);
             // const resp = await tx.wait();
@@ -100,7 +107,7 @@ describe("CreditGuild", function () {
             // expect(await tokenId).to.equal(true);
             // expect(member).to.equal(true);
 
-            // unhappy path
+            // Jose should not be a member
             // const potentialMember2 = JOSE.address;
             // const tx2 = await creditGuild.checkIsMember(potentialMember2);
             // const resp2 = await tx2.wait();
@@ -115,10 +122,25 @@ describe("CreditGuild", function () {
     describe("Register", function () {
 
         it("Should register an array of members", async function () {
+            // unhappy path - should revert because there are not 3 members in the guild
+            // await creditGuild.register([MEMBER1.address, MEMBER2.address, MEMBER3.address]);
 
-            // await creditGuild.register([ALICE.address]);
+            // unhappy path - members are not vouching for msg.sender
 
+            // unhappy path - one of the addresses passed in is not a member
+            // await creditGuild.initialize(MEMBER1.address, MEMBER2.address, MEMBER3.address);
+            // all 3 members need to vouch for msg.sender
+            // await creditGuild.register([MEMBER1.address, MEMBER2.address, MEMBER3.address]);
             // check that ALICE is now a member
+
+            // happy path
+            // await creditGuild.initialize(MEMBER1.address, MEMBER2.address, MEMBER3.address);
+            // all 3 members need to vouch for msg.sender
+            // await creditGuild.register([MEMBER1.address, MEMBER2.address, MEMBER3.address]);
+            // check that ALICE is now a member
+
+            // unhappy path - should revert because msg.sender is already a member
+            // await creditGuild.register([MEMBER1.address, MEMBER2.address, MEMBER3.address]);
 
         });
     });
