@@ -2,8 +2,8 @@
 pragma solidity ^0.8.4;
 
 import "hardhat/console.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "./ERC721Enumerable.sol";
+// import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@unioncredit/v1-sdk/contracts/BaseUnionMember.sol";
@@ -12,7 +12,6 @@ import "@unioncredit/v1-sdk/contracts/BaseUnionMember.sol";
 credit guild
 */
 
-// contract CreditGuild is ERC721, BaseUnionMember { 
 // TODO: ask gerald about making nft non transferrable
 contract CreditGuild is ERC721Enumerable, BaseUnionMember, Ownable { 
 
@@ -51,6 +50,7 @@ contract CreditGuild is ERC721Enumerable, BaseUnionMember, Ownable {
         isInitialized = false;
         
     }
+    // nouns dao v1 logic, nouns dao immutable, ercenumerable
 
     // Seed the DAO with 3 members
     function initialize(
@@ -83,6 +83,9 @@ contract CreditGuild is ERC721Enumerable, BaseUnionMember, Ownable {
 
             // check that this member is vouching for the DAO
             require(userManager.getVouchingAmount(member, address(this)) > 0, "!vouching");
+
+            // pay membership fee
+            underlyingToken.transferFrom(member, address(this), membershipFee);
 
             // set vouch_amount
             userManager.updateTrust(member, vouchAmount);
