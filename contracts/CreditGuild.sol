@@ -72,6 +72,7 @@ contract CreditGuild is ERC721Enumerable, BaseUnionMember, Ownable {
         initialMembers[1] = member2;
         initialMembers[2] = member3;
 
+        console.log("market registry: ", address(marketRegistry));
         console.log("this address: ", address(this));
         console.log("this user manager: ", address(userManager));
 
