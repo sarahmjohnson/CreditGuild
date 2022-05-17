@@ -72,20 +72,14 @@ contract CreditGuild is ERC721Enumerable, BaseUnionMember, Ownable {
         initialMembers[1] = member2;
         initialMembers[2] = member3;
 
-        console.log("market registry: ", address(marketRegistry));
-        console.log("this address: ", address(this));
-        console.log("this user manager: ", address(userManager));
-
         require(userManager.checkIsMember(address(this)), "DAO !member");
 
         for (uint256 i = 0; i < 3; i++) {
             address member = initialMembers[i];
 
             // check that this member is vouching for the DAO
+            // TODO: shouldn't this be: getVouchingAmount(address(this), member) ?
             require(userManager.getVouchingAmount(member, address(this)) > 0, "!vouching");
-
-            // pay membership fee
-            underlyingToken.transferFrom(member, address(this), membershipFee);
 
             // set vouch_amount
             userManager.updateTrust(member, vouchAmount);
@@ -114,12 +108,12 @@ contract CreditGuild is ERC721Enumerable, BaseUnionMember, Ownable {
 
     }
 
-    // TODO: this wont work right now because of the beforeTokenTransfer override
     function burnMembership(address member) public virtual onlyOwner {
-
+        require(checkIsMember(member), "!member");
         uint256 membershipId = tokenOfOwnerByIndex(member, 0); 
         require(ownerOf(membershipId) == member, "!member");
-        _burn(membershipId); emit BurnMembership(member, membershipId); 
+        _burn(membershipId); 
+        emit BurnMembership(member, membershipId); 
         
     }
 
@@ -173,16 +167,16 @@ contract CreditGuild is ERC721Enumerable, BaseUnionMember, Ownable {
 
         // mint their NFT - which is their membership
         uint256 currentId = ++id;
-        _safeMint(member, currentId);
+        _safeMint(address(this), member, currentId);
 
         emit MintNFT(member, currentId);
 
     }
 
-    // calls before every ERC721 call
-    function _beforeTokenTransfer(address from, address to, uint256) internal override pure {
+    // // calls before every ERC721 call
+    // function _beforeTokenTransfer(address from, address to, uint256) internal override pure {
         
-        require(from == address(0) || to == address(0), "!transfer"); 
+    //     require(from == address(0) || to == address(0), "!transfer"); 
 
-    }
+    // }
 }

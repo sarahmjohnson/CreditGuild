@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.8.4;
+pragma solidity ^0.8.4;
 
 /**
  * @title UserManager Contract
@@ -93,7 +93,7 @@ contract UserManagerMock {
     function getLockedStake(address staker, address borrower) public view returns (uint256) {}
 
     function getVouchingAmount(address staker, address borrower) public view returns (uint256) {
-      return 1;
+        return 1;
     }
 
     function addMember(address account) public {}
