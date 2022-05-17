@@ -84,9 +84,6 @@ contract CreditGuild is ERC721Enumerable, BaseUnionMember, Ownable {
             // check that this member is vouching for the DAO
             require(userManager.getVouchingAmount(member, address(this)) > 0, "!vouching");
 
-            // pay membership fee
-            underlyingToken.transferFrom(member, address(this), membershipFee);
-
             // set vouch_amount
             userManager.updateTrust(member, vouchAmount);
 
