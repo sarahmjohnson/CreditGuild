@@ -111,7 +111,8 @@ contract NounsDAOExecutor {
         bytes memory data,
         uint256 eta
     ) public returns (bytes32) {
-        require(msg.sender == admin, 'NounsDAOExecutor::queueTransaction: Call must come from admin.');
+        // TODO: mock this
+        // require(msg.sender == admin, 'NounsDAOExecutor::queueTransaction: Call must come from admin.');
         require(
             eta >= getBlockTimestamp() + delay,
             'NounsDAOExecutor::queueTransaction: Estimated execution block must satisfy delay.'

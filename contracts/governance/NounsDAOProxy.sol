@@ -36,6 +36,8 @@
 pragma solidity ^0.8.6;
 
 import './NounsDAOInterfaces.sol';
+import "hardhat/console.sol";
+
 
 contract NounsDAOProxy is NounsDAOProxyStorage, NounsDAOEvents {
     constructor(

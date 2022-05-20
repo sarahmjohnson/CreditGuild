@@ -2,7 +2,7 @@
 pragma solidity ^0.8.4;
 
 import "hardhat/console.sol";
-import "./base/ERC721Enumerable.sol";
+import "./base/ERC721Checkpointable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@unioncredit/v1-sdk/contracts/BaseUnionMember.sol";
@@ -12,7 +12,7 @@ credit guild
 */
 
 // TODO: ask gerald about making nft non transferrable
-contract CreditGuild is ERC721Enumerable, BaseUnionMember, Ownable { 
+contract CreditGuild is ERC721Checkpointable, BaseUnionMember, Ownable { 
 
     bool public isInitialized;
 
