@@ -2,8 +2,7 @@
 pragma solidity ^0.8.4;
 
 import "hardhat/console.sol";
-import "./ERC721Enumerable.sol";
-// import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "./base/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@unioncredit/v1-sdk/contracts/BaseUnionMember.sol";
@@ -173,10 +172,4 @@ contract CreditGuild is ERC721Enumerable, BaseUnionMember, Ownable {
 
     }
 
-    // // calls before every ERC721 call
-    // function _beforeTokenTransfer(address from, address to, uint256) internal override pure {
-        
-    //     require(from == address(0) || to == address(0), "!transfer"); 
-
-    // }
 }

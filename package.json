@@ -22,6 +22,7 @@
     "@openzeppelin/contracts-upgradeable": "^4.6.0",
     "@unioncredit/v1-sdk": "^1.0.0",
     "base64-sol": "^1.1.0",
-    "eth-permit": "^0.2.1"
+    "eth-permit": "^0.2.1",
+    "typechain": "^3.0.0"
   }
 }
