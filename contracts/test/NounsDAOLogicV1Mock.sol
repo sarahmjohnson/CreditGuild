@@ -1,70 +1,11 @@
 // SPDX-License-Identifier: BSD-3-Clause
-
-/// @title The Nouns DAO logic version 1
-
-/*********************************
- * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ *
- * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ *
- * ░░░░░░█████████░░█████████░░░ *
- * ░░░░░░██░░░████░░██░░░████░░░ *
- * ░░██████░░░████████░░░████░░░ *
- * ░░██░░██░░░████░░██░░░████░░░ *
- * ░░██░░██░░░████░░██░░░████░░░ *
- * ░░░░░░█████████░░█████████░░░ *
- * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ *
- * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ *
- *********************************/
-
-// LICENSE
-// NounsDAOLogicV1.sol is a modified version of Compound Lab's GovernorBravoDelegate.sol:
-// https://github.com/compound-finance/compound-protocol/blob/b9b14038612d846b83f8a009a82c38974ff2dcfe/contracts/Governance/GovernorBravoDelegate.sol
-//
-// GovernorBravoDelegate.sol source code Copyright 2020 Compound Labs, Inc. licensed under the BSD-3-Clause license.
-// With modifications by Nounders DAO.
-//
-// Additional conditions of BSD-3-Clause can be found here: https://opensource.org/licenses/BSD-3-Clause
-//
-// MODIFICATIONS
-// NounsDAOLogicV1 adds:
-// - Proposal Threshold basis points instead of fixed number
-//   due to the Noun token's increasing supply
-//
-// - Quorum Votes basis points instead of fixed number
-//   due to the Noun token's increasing supply
-//
-// - Per proposal storing of fixed `proposalThreshold`
-//   and `quorumVotes` calculated using the Noun token's total supply
-//   at the block the proposal was created and the basis point parameters
-//
-// - `ProposalCreatedWithRequirements` event that emits `ProposalCreated` parameters with
-//   the addition of `proposalThreshold` and `quorumVotes`
-//
-// - Votes are counted from the block a proposal is created instead of
-//   the proposal's voting start block to align with the parameters
-//   stored with the proposal
-//
-// - Veto ability which allows `veteor` to halt any proposal at any stage unless
-//   the proposal is executed.
-//   The `veto(uint proposalId)` logic is a modified version of `cancel(uint proposalId)`
-//   A `vetoed` flag was added to the `Proposal` struct to support this.
-//
-// NounsDAOLogicV1 removes:
-// - `initialProposalId` and `_initiate()` due to this being the
-//   first instance of the governance contract unlike
-//   GovernorBravo which upgrades GovernorAlpha
-//
-// - Value passed along using `timelock.executeTransaction{value: proposal.value}`
-//   in `execute(uint proposalId)`. This contract should not hold funds and does not
-//   implement `receive()` or `fallback()` functions.
-//
-
 pragma solidity ^0.8.6;
 
-import './NounsDAOInterfaces.sol';
+import '../governance/NounsDAOInterfaces.sol';
 import "hardhat/console.sol";
 
 
-contract NounsDAOLogicV1 is NounsDAOStorageV1, NounsDAOEvents {
+contract NounsDAOLogicV1Mock is NounsDAOStorageV1, NounsDAOEvents {
     /// @notice The name of this contract
     string public constant name = 'Nouns DAO';
 
@@ -123,7 +64,8 @@ contract NounsDAOLogicV1 is NounsDAOStorageV1, NounsDAOEvents {
     ) public virtual {
         require(address(timelock) == address(0), 'NounsDAO::initialize: can only initialize once');
 
-        require(msg.sender == admin, 'NounsDAO::initialize: admin only');
+        // TODO: figure out how to mock this
+        // require(msg.sender == admin, 'NounsDAO::initialize: admin only');
         require(timelock_ != address(0), 'NounsDAO::initialize: invalid timelock address');
         require(nouns_ != address(0), 'NounsDAO::initialize: invalid nouns address');
         require(
@@ -187,10 +129,11 @@ contract NounsDAOLogicV1 is NounsDAOStorageV1, NounsDAOEvents {
 
         temp.proposalThreshold = bps2Uint(proposalThresholdBPS, temp.totalSupply);
 
-        require(
-            nouns.getPriorVotes(msg.sender, block.number - 1) > temp.proposalThreshold,
-            'NounsDAO::propose: proposer votes below proposal threshold'
-        );
+        // TODO: mock this
+        // require(
+        //     nouns.getPriorVotes(msg.sender, block.number - 1) > temp.proposalThreshold,
+        //     'NounsDAO::propose: proposer votes below proposal threshold'
+        // );
 
         require(
             targets.length == values.length &&
@@ -343,11 +286,11 @@ contract NounsDAOLogicV1 is NounsDAOStorageV1, NounsDAOEvents {
         require(state(proposalId) != ProposalState.Executed, 'NounsDAO::cancel: cannot cancel executed proposal');
 
         Proposal storage proposal = proposals[proposalId];
-        require(
-            msg.sender == proposal.proposer ||
-                nouns.getPriorVotes(proposal.proposer, block.number - 1) < proposal.proposalThreshold,
-            'NounsDAO::cancel: proposer above threshold'
-        );
+        // require(
+        //     msg.sender == proposal.proposer ||
+        //         nouns.getPriorVotes(proposal.proposer, block.number - 1) < proposal.proposalThreshold,
+        //     'NounsDAO::cancel: proposer above threshold'
+        // );
 
         proposal.canceled = true;
         for (uint256 i = 0; i < proposal.targets.length; i++) {
@@ -369,7 +312,7 @@ contract NounsDAOLogicV1 is NounsDAOStorageV1, NounsDAOEvents {
      */
     function veto(uint256 proposalId) external {
         require(vetoer != address(0), 'NounsDAO::veto: veto power burned');
-        require(msg.sender == vetoer, 'NounsDAO::veto: only vetoer');
+        // require(msg.sender == vetoer, 'NounsDAO::veto: only vetoer');
         require(state(proposalId) != ProposalState.Executed, 'NounsDAO::veto: cannot veto executed proposal');
 
         Proposal storage proposal = proposals[proposalId];
@@ -505,11 +448,11 @@ contract NounsDAOLogicV1 is NounsDAOStorageV1, NounsDAOEvents {
         uint256 proposalId,
         uint8 support
     ) internal returns (uint96) {
-        require(state(proposalId) == ProposalState.Active, 'NounsDAO::castVoteInternal: voting is closed');
+        // require(state(proposalId) == ProposalState.Active, 'NounsDAO::castVoteInternal: voting is closed');
         require(support <= 2, 'NounsDAO::castVoteInternal: invalid vote type');
         Proposal storage proposal = proposals[proposalId];
         Receipt storage receipt = proposal.receipts[voter];
-        require(receipt.hasVoted == false, 'NounsDAO::castVoteInternal: voter already voted');
+        // require(receipt.hasVoted == false, 'NounsDAO::castVoteInternal: voter already voted');
 
         /// @notice: Unlike GovernerBravo, votes are considered from the block the proposal was created in order to normalize quorumVotes and proposalThreshold metrics
         uint96 votes = nouns.getPriorVotes(voter, proposal.startBlock - votingDelay);

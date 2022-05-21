@@ -1,36 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
-/// @title The Nouns DAO executor and treasury
-
-/*********************************
- * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ *
- * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ *
- * ░░░░░░█████████░░█████████░░░ *
- * ░░░░░░██░░░████░░██░░░████░░░ *
- * ░░██████░░░████████░░░████░░░ *
- * ░░██░░██░░░████░░██░░░████░░░ *
- * ░░██░░██░░░████░░██░░░████░░░ *
- * ░░░░░░█████████░░█████████░░░ *
- * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ *
- * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ *
- *********************************/
-
-// LICENSE
-// NounsDAOExecutor.sol is a modified version of Compound Lab's Timelock.sol:
-// https://github.com/compound-finance/compound-protocol/blob/20abad28055a2f91df48a90f8bb6009279a4cb35/contracts/Timelock.sol
-//
-// Timelock.sol source code Copyright 2020 Compound Labs, Inc. licensed under the BSD-3-Clause license.
-// With modifications by Nounders DAO.
-//
-// Additional conditions of BSD-3-Clause can be found here: https://opensource.org/licenses/BSD-3-Clause
-//
-// MODIFICATIONS
-// NounsDAOExecutor.sol modifies Timelock to use Solidity 0.8.x receive(), fallback(), and built-in over/underflow protection
-// This contract acts as executor of Nouns DAO governance and its treasury, so it has been modified to accept ETH.
-
 pragma solidity ^0.8.6;
 
-contract NounsDAOExecutor {
+contract NounsDAOExecutorMock {
     event NewAdmin(address indexed newAdmin);
     event NewPendingAdmin(address indexed newPendingAdmin);
     event NewDelay(uint256 indexed newDelay);
@@ -111,7 +83,7 @@ contract NounsDAOExecutor {
         bytes memory data,
         uint256 eta
     ) public virtual returns (bytes32) {
-        require(msg.sender == admin, 'NounsDAOExecutor::queueTransaction: Call must come from admin.');
+        // require(msg.sender == admin, 'NounsDAOExecutor::queueTransaction: Call must come from admin.');
         require(
             eta >= getBlockTimestamp() + delay,
             'NounsDAOExecutor::queueTransaction: Estimated execution block must satisfy delay.'
@@ -131,7 +103,7 @@ contract NounsDAOExecutor {
         bytes memory data,
         uint256 eta
     ) public {
-        require(msg.sender == admin, 'NounsDAOExecutor::cancelTransaction: Call must come from admin.');
+        // require(msg.sender == admin, 'NounsDAOExecutor::cancelTransaction: Call must come from admin.');
 
         bytes32 txHash = keccak256(abi.encode(target, value, signature, data, eta));
         queuedTransactions[txHash] = false;
@@ -146,14 +118,14 @@ contract NounsDAOExecutor {
         bytes memory data,
         uint256 eta
     ) public virtual returns (bytes memory) {
-        require(msg.sender == admin, 'NounsDAOExecutor::executeTransaction: Call must come from admin.');
+        // require(msg.sender == admin, 'NounsDAOExecutor::executeTransaction: Call must come from admin.');
 
         bytes32 txHash = keccak256(abi.encode(target, value, signature, data, eta));
         require(queuedTransactions[txHash], "NounsDAOExecutor::executeTransaction: Transaction hasn't been queued.");
-        require(
-            getBlockTimestamp() >= eta,
-            "NounsDAOExecutor::executeTransaction: Transaction hasn't surpassed time lock."
-        );
+        // require(
+        //     getBlockTimestamp() >= eta,
+        //     "NounsDAOExecutor::executeTransaction: Transaction hasn't surpassed time lock."
+        // );
         require(
             getBlockTimestamp() <= eta + GRACE_PERIOD,
             'NounsDAOExecutor::executeTransaction: Transaction is stale.'
@@ -187,3 +159,6 @@ contract NounsDAOExecutor {
 
     fallback() external payable {}
 }
+
+
+    
